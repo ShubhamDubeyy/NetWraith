@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0a1a" />
+      <stop offset="50%" style="stop-color:#1a0e2e" />
+      <stop offset="100%" style="stop-color:#0d1117" />
+    </linearGradient>
+    <linearGradient id="shieldStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7" />
+      <stop offset="100%" style="stop-color:#06b6d4" />
+    </linearGradient>
+    <linearGradient id="eyeRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c084fc" />
+      <stop offset="100%" style="stop-color:#22d3ee" />
+    </linearGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="42%" r="45%">
+      <stop offset="0%" style="stop-color:#e0aaff;stop-opacity:0.7" />
+      <stop offset="50%" style="stop-color:#a855f7;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0" />
+    </radialGradient>
+    <radialGradient id="bgGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#0f0a1a;stop-opacity:0" />
+    </radialGradient>
+    <filter id="iconGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#a855f7" flood-opacity="0.4"/>
+    </filter>
+    <filter id="eyeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#c084fc" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- App icon background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="224" fill="url(#bgGlow)"/>
+
+  <!-- Subtle grid -->
+  <pattern id="iconGrid" width="64" height="64" patternUnits="userSpaceOnUse">
+    <path d="M 64 0 L 0 0 0 64" fill="none" stroke="#a855f7" stroke-width="0.5" opacity="0.05"/>
+  </pattern>
+  <rect width="1024" height="1024" rx="224" fill="url(#iconGrid)"/>
+
+  <!-- Shield shape — large centered -->
+  <g transform="translate(512, 460)" filter="url(#iconGlow)">
+    <!-- Outer shield -->
+    <path d="M0 -280 L260 -160 L260 60 C260 180 130 260 0 320 C-130 260 -260 180 -260 60 L-260 -160 Z"
+          fill="url(#shieldStroke)" opacity="0.06" stroke="url(#shieldStroke)" stroke-width="6"/>
+
+    <!-- Inner shield -->
+    <path d="M0 -240 L220 -130 L220 40 C220 150 110 220 0 275 C-110 220 -220 150 -220 40 L-220 -130 Z"
+          fill="none" stroke="url(#shieldStroke)" stroke-width="3" opacity="0.35"/>
+
+    <!-- Core glow -->
+    <ellipse cx="0" cy="-20" rx="120" ry="140" fill="url(#coreGlow)"/>
+
+    <!-- The Wraith Eye — central element -->
+    <g filter="url(#eyeGlow)">
+      <circle cx="0" cy="-60" r="52" fill="none" stroke="url(#eyeRing)" stroke-width="6" opacity="0.8"/>
+      <circle cx="0" cy="-60" r="22" fill="#e0aaff" opacity="0.85"/>
+      <circle cx="0" cy="-60" r="10" fill="#ffffff" opacity="0.95"/>
+      <circle cx="5" cy="-65" r="4" fill="#ffffff" opacity="0.6"/>
+    </g>
+
+    <!-- Signal rings -->
+    <circle cx="0" cy="-60" r="80" fill="none" stroke="url(#eyeRing)" stroke-width="2.5" opacity="0.2"
+            stroke-dasharray="12 18"/>
+    <circle cx="0" cy="-60" r="115" fill="none" stroke="url(#eyeRing)" stroke-width="1.5" opacity="0.1"
+            stroke-dasharray="8 22"/>
+
+    <!-- Data streams — left -->
+    <line x1="-55" y1="-45" x2="-160" y2="-90" stroke="#c084fc" stroke-width="4" opacity="0.45"
+          stroke-linecap="round"/>
+    <circle cx="-160" cy="-90" r="10" fill="#c084fc" opacity="0.5"/>
+    <line x1="-50" y1="-15" x2="-140" y2="30" stroke="#a78bfa" stroke-width="3.5" opacity="0.3"
+          stroke-linecap="round"/>
+    <circle cx="-140" cy="30" r="8" fill="#a78bfa" opacity="0.4"/>
+    <line x1="-45" y1="15" x2="-110" y2="100" stroke="#8b5cf6" stroke-width="3" opacity="0.2"
+          stroke-linecap="round"/>
+    <circle cx="-110" cy="100" r="6" fill="#8b5cf6" opacity="0.3"/>
+
+    <!-- Data streams — right -->
+    <line x1="55" y1="-45" x2="160" y2="-90" stroke="#22d3ee" stroke-width="4" opacity="0.45"
+          stroke-linecap="round"/>
+    <circle cx="160" cy="-90" r="10" fill="#22d3ee" opacity="0.5"/>
+    <line x1="50" y1="-15" x2="140" y2="30" stroke="#67e8f9" stroke-width="3.5" opacity="0.3"
+          stroke-linecap="round"/>
+    <circle cx="140" cy="30" r="8" fill="#67e8f9" opacity="0.4"/>
+    <line x1="45" y1="15" x2="110" y2="100" stroke="#06b6d4" stroke-width="3" opacity="0.2"
+          stroke-linecap="round"/>
+    <circle cx="110" cy="100" r="6" fill="#06b6d4" opacity="0.3"/>
+  </g>
+</svg>

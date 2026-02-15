@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" fill="none">
+  <defs>
+    <!-- Electric violet/cyan palette -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#bf5af2" />
+      <stop offset="45%" style="stop-color:#a855f7" />
+      <stop offset="100%" style="stop-color:#6ee7f9" />
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7" />
+      <stop offset="100%" style="stop-color:#06b6d4" />
+    </linearGradient>
+    <linearGradient id="orbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c084fc" />
+      <stop offset="100%" style="stop-color:#22d3ee" />
+    </linearGradient>
+    <radialGradient id="corePulse" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" style="stop-color:#e0aaff;stop-opacity:0.9" />
+      <stop offset="60%" style="stop-color:#a855f7;stop-opacity:0.5" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0" />
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="softglow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#a855f7" flood-opacity="0.5"/>
+    </filter>
+    <filter id="textglow" x="-5%" y="-15%" width="110%" height="130%">
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#a855f7" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="220" rx="16" fill="#0a0a0f"/>
+  <!-- Subtle grid overlay -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#a855f7" stroke-width="0.3" opacity="0.08"/>
+  </pattern>
+  <rect width="800" height="220" rx="16" fill="url(#grid)"/>
+  <!-- Border -->
+  <rect width="800" height="220" rx="16" fill="none" stroke="url(#shieldGrad)" stroke-width="1" opacity="0.2"/>
+
+  <!-- === Ghost-Shield Icon === -->
+  <g transform="translate(55, 18)" filter="url(#softglow)">
+
+    <!-- Outer shield silhouette -->
+    <path d="M72 8 L138 36 L138 92 C138 128 105 150 72 168 C39 150 6 128 6 92 L6 36 Z"
+          fill="url(#shieldGrad)" opacity="0.08" stroke="url(#shieldGrad)" stroke-width="2"/>
+
+    <!-- Mid shield outline -->
+    <path d="M72 22 L126 44 L126 88 C126 118 99 136 72 152 C45 136 18 118 18 88 L18 44 Z"
+          fill="none" stroke="url(#shieldGrad)" stroke-width="1.2" opacity="0.3"/>
+
+    <!-- Inner glow core -->
+    <ellipse cx="72" cy="78" rx="28" ry="32" fill="url(#corePulse)"/>
+
+    <!-- Wraith face / ghost eye -->
+    <circle cx="72" cy="68" r="12" fill="none" stroke="url(#orbGrad)" stroke-width="2" opacity="0.8"/>
+    <circle cx="72" cy="68" r="5" fill="#e0aaff" opacity="0.9"/>
+    <circle cx="72" cy="68" r="2" fill="#ffffff" opacity="0.9"/>
+
+    <!-- Data stream lines radiating outward (network traffic visualization) -->
+    <!-- Left streams -->
+    <line x1="58" y1="72" x2="28" y2="62" stroke="#c084fc" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="28" cy="62" r="3" fill="#c084fc" opacity="0.6"/>
+    <line x1="55" y1="82" x2="30" y2="100" stroke="#a78bfa" stroke-width="1.2" opacity="0.35"/>
+    <circle cx="30" cy="100" r="2.5" fill="#a78bfa" opacity="0.5"/>
+    <line x1="60" y1="90" x2="42" y2="120" stroke="#8b5cf6" stroke-width="1" opacity="0.25"/>
+    <circle cx="42" cy="120" r="2" fill="#8b5cf6" opacity="0.4"/>
+
+    <!-- Right streams -->
+    <line x1="86" y1="72" x2="116" y2="62" stroke="#22d3ee" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="116" cy="62" r="3" fill="#22d3ee" opacity="0.6"/>
+    <line x1="89" y1="82" x2="114" y2="100" stroke="#67e8f9" stroke-width="1.2" opacity="0.35"/>
+    <circle cx="114" cy="100" r="2.5" fill="#67e8f9" opacity="0.5"/>
+    <line x1="84" y1="90" x2="102" y2="120" stroke="#06b6d4" stroke-width="1" opacity="0.25"/>
+    <circle cx="102" cy="120" r="2" fill="#06b6d4" opacity="0.4"/>
+
+    <!-- Signal rings around eye -->
+    <circle cx="72" cy="68" r="20" fill="none" stroke="url(#orbGrad)" stroke-width="0.8" opacity="0.25"
+            stroke-dasharray="4 6"/>
+    <circle cx="72" cy="68" r="30" fill="none" stroke="url(#orbGrad)" stroke-width="0.5" opacity="0.12"
+            stroke-dasharray="3 8"/>
+  </g>
+
+  <!-- === Title === -->
+  <text x="210" y="100" font-family="SF Pro Display, -apple-system, Helvetica Neue, Arial, sans-serif"
+        font-size="68" font-weight="800" fill="url(#titleGrad)" filter="url(#textglow)"
+        letter-spacing="-2">NetWraith</text>
+
+  <!-- Tagline -->
+  <text x="214" y="136" font-family="SF Mono, Menlo, Monaco, Consolas, monospace"
+        font-size="14.5" fill="#7c7c8a" letter-spacing="4.5" font-weight="500">
+    iOS TRAFFIC INTERCEPTION FRAMEWORK
+  </text>
+
+  <!-- Badges -->
+  <!-- Version -->
+  <rect x="214" y="155" width="54" height="23" rx="5" fill="#a855f7" opacity="0.12"
+        stroke="#a855f7" stroke-width="0.8"/>
+  <text x="225" y="171" font-family="SF Mono, Menlo, monospace" font-size="12"
+        fill="#c084fc" font-weight="600">v2.0</text>
+
+  <!-- iOS -->
+  <rect x="278" y="155" width="72" height="23" rx="5" fill="#06b6d4" opacity="0.12"
+        stroke="#06b6d4" stroke-width="0.8"/>
+  <text x="290" y="171" font-family="SF Mono, Menlo, monospace" font-size="12"
+        fill="#22d3ee" font-weight="600">iOS 15+</text>
+
+  <!-- Swift -->
+  <rect x="360" y="155" width="74" height="23" rx="5" fill="#f97316" opacity="0.12"
+        stroke="#f97316" stroke-width="0.8"/>
+  <text x="372" y="171" font-family="SF Mono, Menlo, monospace" font-size="12"
+        fill="#fb923c" font-weight="600">Swift 5</text>
+
+  <!-- MITM -->
+  <rect x="444" y="155" width="60" height="23" rx="5" fill="#ef4444" opacity="0.12"
+        stroke="#ef4444" stroke-width="0.8"/>
+  <text x="457" y="171" font-family="SF Mono, Menlo, monospace" font-size="12"
+        fill="#f87171" font-weight="600">MITM</text>
+
+  <!-- Decorative elements — right side data streams -->
+  <g opacity="0.15">
+    <rect x="660" y="35" width="45" height="3" rx="1.5" fill="#a855f7"/>
+    <rect x="715" y="35" width="15" height="3" rx="1.5" fill="#06b6d4"/>
+    <rect x="680" y="48" width="30" height="3" rx="1.5" fill="#c084fc"/>
+    <rect x="720" y="48" width="20" height="3" rx="1.5" fill="#22d3ee"/>
+    <rect x="650" y="61" width="55" height="3" rx="1.5" fill="#8b5cf6"/>
+    <rect x="715" y="61" width="10" height="3" rx="1.5" fill="#67e8f9"/>
+  </g>
+  <g opacity="0.15">
+    <rect x="660" y="155" width="25" height="3" rx="1.5" fill="#06b6d4"/>
+    <rect x="695" y="155" width="40" height="3" rx="1.5" fill="#a855f7"/>
+    <rect x="670" y="168" width="60" height="3" rx="1.5" fill="#c084fc"/>
+    <rect x="650" y="181" width="35" height="3" rx="1.5" fill="#22d3ee"/>
+    <rect x="695" y="181" width="20" height="3" rx="1.5" fill="#8b5cf6"/>
+  </g>
+
+  <!-- Corner crosshairs -->
+  <g stroke="url(#shieldGrad)" stroke-width="1.5" opacity="0.35">
+    <path d="M18 42 L18 18 L42 18"/>
+    <path d="M758 42 L758 18 L782 18" transform="scale(-1,1) translate(-800,0)"/>
+    <path d="M18 178 L18 202 L42 202"/>
+    <path d="M758 178 L758 202 L782 202" transform="scale(-1,1) translate(-800,0)"/>
+  </g>
+
+  <!-- Dot accents at corners -->
+  <circle cx="18" cy="18" r="2" fill="#a855f7" opacity="0.4"/>
+  <circle cx="782" cy="18" r="2" fill="#06b6d4" opacity="0.4"/>
+  <circle cx="18" cy="202" r="2" fill="#06b6d4" opacity="0.4"/>
+  <circle cx="782" cy="202" r="2" fill="#a855f7" opacity="0.4"/>
+</svg>
