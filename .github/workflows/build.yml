@@ -1,0 +1,219 @@
+name: Build NetWraith IPA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sign_method:
+        description: 'Signing method'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - apple
+          - ldid
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          brew install xcodegen ldid
+          echo "=== Installed tool versions ==="
+          xcodegen --version || true
+          ldid 2>&1 | head -1 || true
+
+      - name: Select Xcode version
+        run: |
+          XCODE=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          echo "Using: $XCODE"
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+          swift --version
+
+      - name: Determine signing method
+        id: signing
+        run: |
+          METHOD="${{ github.event.inputs.sign_method || 'auto' }}"
+          if [ "$METHOD" = "auto" ]; then
+            if [ -n "${{ secrets.APPLE_CERTIFICATE_BASE64 }}" ]; then
+              METHOD="apple"
+            else
+              METHOD="ldid"
+            fi
+          fi
+          echo "method=$METHOD" >> $GITHUB_OUTPUT
+          echo "Signing method: $METHOD"
+
+      # ── Apple Developer signing setup (when certificate is configured) ──
+      - name: Install Apple certificate and profile
+        if: steps.signing.outputs.method == 'apple'
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROVISION_PROFILE_APP: ${{ secrets.PROVISION_PROFILE_APP_BASE64 }}
+          PROVISION_PROFILE_TUNNEL: ${{ secrets.PROVISION_PROFILE_TUNNEL_BASE64 }}
+        run: |
+          # Create temporary keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 16)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificate
+          CERT_PATH=$RUNNER_TEMP/certificate.p12
+          echo -n "$CERTIFICATE_BASE64" | base64 --decode -o "$CERT_PATH"
+          security import "$CERT_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          # Install provisioning profiles
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo -n "$PROVISION_PROFILE_APP" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/app.mobileprovision
+          echo -n "$PROVISION_PROFILE_TUNNEL" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/tunnel.mobileprovision
+
+          echo "Apple Developer signing configured."
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      # ── Build: Apple-signed or unsigned ──
+      - name: Build app (Apple signed)
+        if: steps.signing.outputs.method == 'apple'
+        run: |
+          set -o pipefail
+          xcodebuild -project NetWraith.xcodeproj \
+            -scheme NetWraith \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/derived \
+            -allowProvisioningUpdates \
+            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
+            2>&1 | tee build/xcodebuild.log | tail -80
+
+      - name: Build app (unsigned for ldid)
+        if: steps.signing.outputs.method == 'ldid'
+        run: |
+          set -o pipefail
+          xcodebuild -project NetWraith.xcodeproj \
+            -scheme NetWraith \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/derived \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            2>&1 | tee build/xcodebuild.log | tail -80
+
+      - name: Show warnings summary
+        if: always()
+        run: |
+          echo "=== BUILD WARNINGS ==="
+          grep -c "warning:" build/xcodebuild.log || echo "0 warnings"
+          echo ""
+          grep "warning:" build/xcodebuild.log | head -30 || true
+          echo ""
+          echo "=== BUILD ERRORS ==="
+          grep "error:" build/xcodebuild.log | head -30 || true
+
+      - name: Validate built binary
+        run: |
+          APP_PATH=$(find build/derived -name "NetWraith.app" -type d | head -1)
+          echo "=== App bundle: $APP_PATH ==="
+
+          echo ""
+          echo "=== Main binary ==="
+          file "$APP_PATH/NetWraith"
+          ls -lh "$APP_PATH/NetWraith"
+
+          echo ""
+          echo "=== Linked frameworks ==="
+          otool -L "$APP_PATH/NetWraith"
+
+          echo ""
+          echo "=== Tunnel extension binary ==="
+          file "$APP_PATH/PlugIns/PacketTunnelExtension.appex/PacketTunnelExtension"
+          ls -lh "$APP_PATH/PlugIns/PacketTunnelExtension.appex/PacketTunnelExtension"
+
+          echo ""
+          echo "=== Tunnel linked frameworks ==="
+          otool -L "$APP_PATH/PlugIns/PacketTunnelExtension.appex/PacketTunnelExtension"
+
+          echo ""
+          echo "=== Bundle contents ==="
+          find "$APP_PATH" -type f | sort
+
+          echo ""
+          echo "=== Info.plist check ==="
+          plutil -p "$APP_PATH/Info.plist"
+
+          echo ""
+          echo "=== Extension Info.plist check ==="
+          plutil -p "$APP_PATH/PlugIns/PacketTunnelExtension.appex/Info.plist"
+
+      # ── Sign: ldid for TrollStore/jailbreak ──
+      - name: Ad-hoc sign with ldid
+        if: steps.signing.outputs.method == 'ldid'
+        run: |
+          APP_PATH=$(find build/derived -name "NetWraith.app" -type d | head -1)
+
+          echo "Signing PacketTunnel extension..."
+          ldid -SPacketTunnel/PacketTunnel.entitlements "$APP_PATH/PlugIns/PacketTunnelExtension.appex/PacketTunnelExtension"
+
+          echo "Signing main app..."
+          ldid -SApp/NetWraith.entitlements "$APP_PATH/NetWraith"
+
+          echo ""
+          echo "=== Verify embedded entitlements ==="
+          ldid -e "$APP_PATH/NetWraith" || true
+          echo "---"
+          ldid -e "$APP_PATH/PlugIns/PacketTunnelExtension.appex/PacketTunnelExtension" || true
+
+      - name: Package IPA
+        run: |
+          APP_PATH=$(find build/derived -name "NetWraith.app" -type d | head -1)
+          mkdir -p build/Payload
+          cp -r "$APP_PATH" build/Payload/
+
+          SIGN_METHOD="${{ steps.signing.outputs.method }}"
+          IPA_NAME="NetWraith-${SIGN_METHOD}.ipa"
+
+          cd build && zip -r "../$IPA_NAME" Payload/
+          ls -lh "../$IPA_NAME"
+
+          # Also create a generic name for easy download
+          cp "../$IPA_NAME" "../NetWraith.ipa"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetWraith-IPA-${{ steps.signing.outputs.method }}
+          path: |
+            NetWraith.ipa
+            NetWraith-*.ipa
+          retention-days: 30
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build/xcodebuild.log
+          retention-days: 7
+
+      # ── Cleanup Apple signing ──
+      - name: Cleanup keychain
+        if: always() && steps.signing.outputs.method == 'apple'
+        run: security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
